@@ -59,4 +59,33 @@ export default class LogsController {
             }
         };
     }
+
+    public async getOneGlobal(ctx: RouterContext): Promise<void> {
+        const { flowId, stepId } = <IGetLogsParams>ctx.params;
+        let { pageSize = 1000, pageToken } = <IGetLogsQuery>ctx.query;
+
+        pageSize = parseInt(pageSize as string, 10);
+        if (Number.isNaN(pageSize)) {
+            throw new BadRequest('pageSize should be a valid number');
+        }
+
+        const options = {
+            pageSize,
+            pageToken,
+            filter: `resource.type=k8s_container AND jsonPayload.stepId=${stepId} AND jsonPayload.flowId=${flowId}`
+        };
+
+        const [entries, request, response] = await this.gcloudLogging.getEntries(options);
+
+        ctx.body = {
+            data: entries ? entries.map((entry: Entry) => ({
+                timestamp: entry.metadata.timestamp,
+                message: entry.data
+            })) : [],
+            meta: {
+                pageSize,
+                nextPageToken: response.nextPageToken
+            }
+        };
+    }
 }

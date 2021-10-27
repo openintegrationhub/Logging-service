@@ -16,5 +16,6 @@ export default ({config, logger}: ILogsRouterOptions) => {
         .use(bodyParser())
         // .use(koaMiddleware)
         .get('/flows/:flowId/steps/:stepId', (ctx: RouterContext) => controller.getOne(ctx))
+        .get('/global/flows/:flowId/steps/:stepId', (ctx: RouterContext) => controller.getOneGlobal(ctx))
         .routes();
 }
